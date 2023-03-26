@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Weather API with Open-Meteo
+  description: >
+    A weather API for querying and filtering based on natural language queries and filters.
+  version: 1.0.0
+servers:
+  - url: https://api.open-meteo.com/v1
+    description: Open Meteo Weather Forecast API endpoint
+paths:
+  /forecast:
+    get:
+      summary: Get the weather forecast for a specific latitude and longitude.
+      description: >
+        Retrieve an hourly weather forecast and daily aggregation for a given geographical coordinate, covering up to 16 days ahead depending on the specified parameters. Get the most accurate weather data derived by blending multiple models.
+        This API requires latitude and longitude parameters. Other optional parameters include elevation, hourly (a list of weather variables for hourly forecasts), daily (a list of daily weather variable aggregations), current_weather (to include current weather conditions), temperature_unit (celsius or fahrenheit), windspeed_unit (kmh, ms, mph, or kn), precipitation_unit (mm or inch), timeformat (iso8601 or unixtime), timezone (any valid time zone name or auto for automatic resolution based on coordinates), past_days (0-2 for including past weather data), forecast_days (0-16 for the number of forecast days to return), start_date and end_date (the time interval for weather data), models (manual selection of weather models), and cell_selection (grid-cell selection preference: land, sea, or nearest).
+        For example, to get an hourly forecast with temperature (in Fahrenheit) and humidity variables for latitude 52.52 and longitude 13.419, make a request like this:
+
+        ```
+        GET /v1/forecast?latitude=52.52&longitude=13.419&hourly=temperature_2m,relativehumidity_2m&temperature_unit=fahrenheit
+        ```
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: The latitude WGS84 coordinate of the location.
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: The longitude WGS84 coordinate of the location.
+        - name: elevation
+          in: query
+          schema:
+            type: number
+            format: double
+          description: >
+            The elevation used for statistical downscaling.
+            Per default, a 90 meter digital elevation model is used.
+            Set elevation to 'nan' to disable downscaling.
+        - name: hourly
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            A list of weather variables to be returned in hourly forecasts.
+            Comma separated values or multiple &hourly= parameter can be used.
+        - name: daily
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            A list of daily weather variable aggregations to be returned.
+            Comma separated values or multiple &daily= parameter can be used.
+        - name: current_weather
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Include current weather conditions in the JSON output.
+        - name: temperature_unit
+          in: query
+          schema:
+            type: string
+            enum:
+              - celsius
+              - fahrenheit
+            default: celsius
+          description: The unit in which temperature values are returned.
+        - name: windspeed_unit
+          in: query
+          schema:
+            type: string
+            enum:
+              - kmh
+              - ms
+              - mph
+              - kn
+            default: kmh
+          description: The unit in which wind speed values are returned.
+        - name: precipitation_unit
+          in: query
+          schema:
+            type: string
+            enum:
+              - mm
+              - inch
+            default: mm
+          description: The unit in which precipitation values are returned.
+        - name: timeformat
+          in: query
+          schema:
+            type: string
+            enum:
+              - iso8601
+              - unixtime
+            default: iso8601
+          description: The format in which time values are returned.
+        - name: timezone
+          in: query
+          schema:
+            type: string
+            default: GMT
+            example: Europe/Berlin
+          description: >
+            The timezone to be applied to returned timestamps.
+            Use 'auto' to resolve the coordinates to the local timezone automatically.
+        - name: past_days
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 2
+            default: 0
+          description: Include yesterday or the day before yesterday's data in the output.
+        - name: forecast_days
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 16
+            default: 7
+          description: Number of days of forecast to be returned, up to 16 days.
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+            example: "2022-06-30"
+          description: The start date for the weather data retrieval in the format 'yyyy-mm-dd'.
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+            example: "2022-07-15"
+          description: The end date for the weather data retrieval in the format 'yyyy-mm-dd'.
+        - name: models
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Manually select one or more weather models.
+            Per default, the best suitable weather models will be combined.
+        - name: cell_selection
+          in: query
+          schema:
+            type: string
+            enum: [land, sea, nearest]
+            default: land
+          description: >
+            Set a preference for how grid-cells are selected.
+            Default 'land' finds a suitable grid-cell on land with similar elevation.
+            'sea' prefers grid-cells on sea.
+            'nearest' selects the nearest possible grid-cell.
+      responses:
+        "200":
+          description: >
+            A JSON hourly weather forecast for 7 days starting at 0:00 of the
+            current day containing 168 hours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latitude:
+                    type: number
+                    format: double
+                    example: 52.52
+                  longitude:
+                    type: number
+                    format: double
+                    example: 13.419
+                  elevation:
+                    type: number
+                    format: double
+                    example: 44.812
+                  # Other response properties are omitted for brevity.
+        "400":
+          description: Bad Request. An error occurred while processing the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    example: true
+                  reason:
+                    type: string
+                    example: "Cannot initialize WeatherVariable from invalid String value tempeture_2m for key hourly"
