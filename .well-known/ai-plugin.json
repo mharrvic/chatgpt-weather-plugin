@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "weather",
+  "name_for_human": "Weather Plugin",
+  "description_for_model": "Plugin for weather information. Use whenever user ask for weather information.",
+  "description_for_human": "Weather information",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://your-app-url.com/.well-known/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "https://your-app-url.com/.well-known/logo.png",
+  "contact_email": "hello@contact.com",
+  "legal_info_url": "hello@legal.com"
+}
