@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "chatgpt-weather-plugin"
+version = "0.1.0"
+description = "Weather API using open-meteo"
+authors = ["mac <mharrvic@gmail.com>"]
+readme = "README.md"
+packages = [{include = "chatgpt_weather_plugin"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.0"
+pydantic = "^1.10.7"
+requests = "^2.28.2"
+uvicorn = "^0.21.1"
+
+[tool.poetry.scripts]
+start = "server.main:start"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
